@@ -1,0 +1,128 @@
+{% extends 'movieapp/movie_detail.html' %}
+{% block comment %}
+{% load static %} {% load humanize %}
+
+<div class="site-section"data-aos="fade-up">
+    <div class="container">
+            <h3>New Comment</h3>
+            {% if request.session.user_id %}
+            <form method="post" id="comment-form" >
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-8 form-group" style="padding:0;">
+                        <div class="star-box">
+                            <span class="star star_left" value="1"></span>
+                            <span class="star star_right" value="2"></span>
+
+                            <span class="star star_left" value="3"></span>
+                            <span class="star star_right" value="4"></span>
+
+                            <span class="star star_left" value="5"></span>
+                            <span class="star star_right"  value="6"></span>
+
+                            <span class="star star_left" value="7"></span>
+                            <span class="star star_right" value="8"></span>
+
+                            <span class="star star_left" value="9"></span>
+                            <span class="star star_right" value="10"></span>
+
+                            <span id="cur-score" style="font-size: x-large;"></span>
+                            <span id="reset-star" style="cursor: pointer;">reset</span>
+                        </div>
+                        <div style="display:none;">
+                            <input type="range" class="form-control" id="comment-score" name="comment-score">
+                        </div>
+                    </div>
+                    <div class="col-md-7 form-group" style="padding:0;">
+                        <input type="text" class="form-control" id="comment" name="comment" placeholder="댓글을 작성해주세요.">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="height: 2.5rem;">등록</button>
+                </div>
+            </form>
+
+            {% else %}
+            <p><a href="{% url 'login' %}?next={{request.get_full_path|urlencode}}">로그인</a>을 먼저 해주세요.</p>
+            {% endif %}
+
+        <div class="row">
+            <div class="col-md-10-left" data-aos="fade-up">
+            <hr>
+            {% for comment in comments %}
+            <div class="comment">
+                <p style="font-family: NanumSquare-RoundR;">{{comment.comment|linebreaksbr}}</p>
+                <div class="date" style="font-size: small;">
+                    {% if comment.comment_score != 0 %}
+                    <span>
+                        <img src="{% static 'movieapp/css/star.png' %}" alt="star" align="bottom" width="18px" height="18px" style="float:left;">
+                         {{comment.comment_score}}점 |
+                    </span>
+                    {% endif %}
+                    <span>{{comment.user.username}} |</span>
+                    <span>{{ comment.published_date|date:"Y-m-d l A h:i" }} |</span>
+                    {% if comment.user.username == request.session.user_id %}
+                        <a href="{% url 'remove_comment' pk=movie.pk comment_id=comment.id %}?next={{request.get_full_path|urlencode}}" class="delete-btn" onclick="return confirm('정말로 삭제하시겠습니까?')">삭제</a>
+                    {% endif %}
+                </div>
+
+                <hr>
+            </div>
+            {% empty %}
+            <p>아직 댓글이 없습니다.</p>
+            {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+    $(".star").on('click',function(){
+        var star_value = $(this).attr('value');
+        $('#cur-score').html(star_value+'점');
+        $('#comment-score').val(star_value);
+
+        var idx = $(this).index();
+        $(".star").removeClass("on");
+         for(var i=0; i<=idx; i++){
+            $(".star").eq(i).addClass("on");
+         };
+    });
+    // 선택한 별점 초기화
+    $("#reset-star").on('click', function (){
+        $(".star").removeClass("on");
+        $('#comment-score').val(0);
+        $('#cur-score').html('');
+    })
+    // 댓글 추가
+    $("#comment-form").submit(function (){
+        const score_value = $("#comment-score").val();
+        const cur_url = '{{request.get_full_path|urlencode}}';
+        if(score_value <= 0 || score_value > 10){
+            alert('평점을 입력해주세요.');
+            return false;
+        };
+
+        const comment = $("#comment").val();
+        $.ajax({
+            url: "{% url 'add_comment' pk=movie.pk %}",
+            type: "POST",
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                "comment": comment,
+                "comment_score": score_value,
+                // "cur_url": cur_url
+            },
+            dataType: "json",
+            success: function (response){
+                if(response['check'] == false){
+                    alert(response['error']);
+                }
+                window.location.replace(cur_url);
+            },
+        })
+    });
+</script>
+
+{% endblock comment %}

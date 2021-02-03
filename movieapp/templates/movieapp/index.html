@@ -1,0 +1,89 @@
+{% extends 'movieapp/base.html' %}
+{% block contents %}
+{% load static %}
+
+<head>
+  <meta charset="utf-8">
+  <title>방에서 즐기자 방구석스크린</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="" name="keywords">
+  <meta content="" name="description">
+</head>
+
+  <main id="main" style="font-family: TmoneyRoundWindExtraBold; font-size: 20px;">
+           <div class="container">
+          <div class="container" style="padding:3%">
+            <form class="form-inline my-2 my-lg-0" action="{% url 'search_movie' %}" method="get">
+              {% csrf_token %}
+              <div class="box_main" style="font-family: NanumSquare-RoundB;">
+			    <input type="search" class="email_bt" placeholder="영화제목,배우,장르,감독 입력" name="word" value="{{word}}">
+				<button class="subscribe_bt" type="submit">검색</a></button>
+		      </div>
+            </form>
+          </div>
+          <div class="container" id="filters">
+            <hr class="nav-filter">
+            <div  class="filters" align="center">
+              <a href="#" class="filter" value="all"><font class="genre">전체</font></a>
+              {% for genre in genre_list %}
+              <a href="#" class="filter" value="{{genre}}" style="margin-left: 1%"><font class="genre">{{genre}}</font></a>
+              {% endfor %}
+            </div>
+            <hr class="nav-filter" style="margin-bottom: 4%;">
+          </div>
+
+        <div id="portfolio-grid" class="row no-gutter" data-aos="fade-up" data-aos-delay="200">
+          {% for movie in movie_list %}
+          <div class="item web col-sm-6 col-md-4 col-lg-4 mb-4">
+            <a href="{% url 'movie_detail' pk=movie.pk %}" class="item-wrap fancybox" id="movie{{forloop.counter0}}">
+              <div class="work-info">
+                <h3>{{ movie.title }}</h3>
+                <span class="genre-names">
+                {% for genre in movie.genres.all %}
+                  {{ genre.genre }}
+                {% endfor %}
+                </span><br>
+                <span class="score">{{ movie.score|floatformat:2 }}</span>
+                <p class="test"></p>
+              </div>
+              <img class="img-fluid" src="{% static 'movieapp/img/poster/'%}{{movie.pk}}.jpg" style="max-height:518px; min-height: 500px; min-width: 350px;">
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+  </main>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+  $(".filter").click(function(){
+    const genre = $(this).attr('value');
+    $.ajax({
+      type: "POST",
+      url: "{% url 'index_filter' %}",
+      data: {'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'genre': genre },
+      dataType: "json",
+      success: function(response){
+        const data = jQuery.parseJSON(response['movie_data']);
+        $.each(data, function(i, obj) {
+          const pk = obj['pk'];
+          const movie_obj = obj['fields'];
+          const t = $('#movie'+i+' .work-info');
+          t.children('h3').text(movie_obj['title']);
+          t.children('span.score').text(movie_obj['score'].toFixed(2));
+          $('#movie'+i+' img').attr('src', "{% static 'movieapp/img/poster/'%}"+pk+".jpg");
+          $('#movie'+i).attr('href', "movie_detail/"+pk);
+
+          const genre_data = jQuery.parseJSON(response[pk]);
+          let genres = ''
+          $.each(genre_data, function (j, g_obj) {
+            genres = genres.concat(g_obj['fields']['genre'], ' ');
+          });
+          t.children('span.genre-names').text(genres);
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

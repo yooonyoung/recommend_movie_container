@@ -1,0 +1,51 @@
+{% extends 'movieapp/base.html' %}
+{% block contents %}
+{% load static %}
+
+<head>
+  <meta charset="utf-8">
+  <title>검색 결과 : 방구석스크린</title>
+</head>
+
+  <div class="container">
+          <div class="container" style="padding:3%">
+            <form class="form-inline my-2 my-lg-0" action="{% url 'search_movie' %}" method="get">
+              {% csrf_token %}
+              <div class="box_main">
+			    <input type="search" class="email_bt" placeholder="영화제목,배우,장르,감독 입력" name="word" value="{{word}}" style="border: 1px solid;">
+				<button class="subscribe_bt" type="submit">검색</a></button>
+		      </div>
+            </form>
+          </div>
+
+    {% if not movies %}
+        <div align="center" style="margin-top: 10%">
+            '{{ search_word }}'에 대한 검색 결과가 없습니다.
+        </div>
+
+    {% else %}
+    <div class="container" style="margin-top: 5%">
+        '{{ search_word }}'에 대한 {{ movies.count }}건의 통합 검색 결과가 있습니다.
+        <div id="portfolio-grid" class="row no-gutter" data-aos="fade-up" data-aos-delay="200" style="margin-top: 5%">
+            {% for movie in movies %}
+          <div class="item web col-sm-6 col-md-4 col-lg-4 mb-4">
+            <a href="{% url 'movie_detail' pk=movie.id %}" class="item-wrap fancybox">
+              <div class="work-info">
+                <h3>{{ movie.title }}</h3>
+                <span class="genre-names">
+                {% for genre in movie.genres.all %}
+                  {{ genre.genre }}
+                {% endfor %}
+                </span><br>
+                <span>{{ movie.score|floatformat:2 }}</span>
+              </div>
+              <img class="img-fluid" src="{% static 'movieapp/img/poster/'%}{{movie.id}}.jpg" style="max-height:518px; min-height: 500px; min-width: 350px;">
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+    {% endif %}
+    </div>
+  </div>
+
+{% endblock %}

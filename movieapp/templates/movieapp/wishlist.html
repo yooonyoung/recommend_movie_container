@@ -1,0 +1,39 @@
+{% extends 'movieapp/base.html' %}
+{% block contents %}
+{% load static %}
+
+<head>
+  <meta charset="utf-8">
+  <title>내가 찜한 영화 : 방구석스크린</title>
+</head>
+
+    {% if not wish_movies %}
+        <div align="center" style="margin-top: 10%">
+            내가 찜한 영화가 없습니다.
+        </div>
+
+    {% else %}
+    <div class="container" style="margin-top: 5%">
+        <h3>{{request.session.user_id}}님이 찜한 영화</h3>
+        <div id="portfolio-grid" class="row no-gutter" data-aos="fade-up" data-aos-delay="200" style="margin-top: 5%">
+            {% for movie in wish_movies%}
+          <div class="item web col-sm-6 col-md-4 col-lg-4 mb-4">
+            <a href="{% url 'movie_detail' pk=movie.id %}" class="item-wrap fancybox">
+              <div class="work-info">
+                <h3>{{ movie.title }}</h3>
+                <span class="genre-names">
+                {% for genre in movie.genres.all %}
+                  {{ genre.genre }}
+                {% endfor %}
+                </span><br>
+                <span>{{ movie.score|floatformat:2 }}</span>
+              </div>
+              <img class="img-fluid" src="{% static 'movieapp/img/poster/'%}{{movie.pk}}.jpg" style="min-height: 500px; max-height:518px; min-width: 350px;">
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+    {% endif %}
+    </div>
+
+{% endblock %}

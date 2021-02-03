@@ -1,0 +1,30 @@
+version: '3'
+
+
+services:
+   mysql:
+      image: mysql:latest
+      environment:
+         - MYSQL_DATABASE=recommend_db
+         - MYSQL_USER=young
+         - MYSQL_PASSWORD=ehzjehzj
+         - MYSQL_ROOT_PASSWORD=mysql
+      ports:
+        - "3306:3306"
+
+   django:
+     build:
+       context: .
+       dockerfile: Dockerfile
+     command: python manage.py runserver 0.0.0.0:8000
+     environment:
+       - DJANGO_DEBUG=True
+       - DJANGO_DB_HOST=recommend-db.cfsj3g78c3hc.us-east-1.rds.amazonaws.com
+       - DJANGO_DB_PORT=3306
+       - DJANGO_DB_NAME=recommend_db
+       - DJANGO_DB_USERNAME=young
+       - DJANGO_DB_PASSWORD=ehzjehzj
+     ports:
+       - 8000:8000
+     depends_on:
+       - mysql
