@@ -17,7 +17,7 @@ from .update_data.wordcloud import main_cloud
 from .update_data.movie_scraping import main_scraping
 from django.contrib import messages
 import bcrypt
-
+    
 redirect_path: str = ""
 genre_classes = ['드라마', '판타지', '공포', '멜로/로맨스', '모험', '스릴러', '코미디', '미스터리', '애니메이션',
                   '범죄', 'SF', '액션']
