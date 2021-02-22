@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-deployment
+  labels:
+    app: django-young
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-young
+  template:
+    metadata:
+      labels:
+        app: django-young
+    spec:
+      containers:
+      - name: django-young
+        image: dbsydde/recommendmovie
+        ports:
+        - containerPort: 8000
