@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+  labels:
+    app: django
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+      - image: dbsydde/recommendmovie:latest
+        name: django
+        env:
+        - name: DJANGO_DB_HOST
+          value: mysql:3306
+        - name: DJANGO_DB_NAME
+          value: recommend_db
+        - name: DJANGO_DB_USER
+          value: young
+        - name: DJANGO_DB_PASSWORD
+          value: ehzjehzj
+        ports:
+        - containerPort: 8000
+          name: django
